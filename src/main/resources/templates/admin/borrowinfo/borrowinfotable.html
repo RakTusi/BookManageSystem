@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>书本列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/css/public.css}" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+
+        <fieldset class="table-search-fieldset">
+            <legend>搜索信息</legend>
+            <div style="margin: 10px 10px 10px 10px">
+                <form id="form-search" class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">记录ID</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="id" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">书目ID</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="bookInfoId" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">书本ID</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="bookId" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">书名</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="title" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">用户ID</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="userId" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">用户姓名</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="userName" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">申请时间</label>
+                            <div class="layui-input-inline" style="width: 120px">
+                                <input type="text" id="creSTime" name="createStartTime" placeholder="开始时间" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                            <label class="layui-form-mid">-</label>
+                            <div class="layui-input-inline" style="width: 120px">
+                                <input type="text" id="creETime" name="createEndTime" placeholder="结束时间" autocomplete="off"
+                                       class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">状态</label>
+                            <div class="layui-input-inline" style="width: 117px;">
+                                <select name="state" lay-verify="">
+                                    <option value="" selected>无</option>
+                                    <option value="0">申请中</option>
+                                    <option value="1">借阅中</option>
+                                    <option value="2">归还破损</option>
+                                    <option value="3">逾期未还</option>
+                                    <option value="4">已归还</option>
+                                    <option value="5">丢失</option>
+                                    <option value="6">申请拒绝</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <button type="submit" class="layui-btn layui-btn-normal" lay-submit
+                                    lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i> 搜 索
+                            </button>
+                            <button type="submit" class="layui-btn layui-btn-primary" lay-submit
+                                    lay-filter="data-refresh-btn"><i class="layui-icon layui-icon-refresh"></i> 刷 新
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+
+        <script type="text/html" id="toolbar">
+            <div class="layui-btn-container">
+                <!--                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"><i-->
+                <!--                        class="layui-icon layui-icon-add-1"></i> 添加-->
+                <!--                </button>-->
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"><i
+                        class="layui-icon layui-icon-delete"></i> 删除
+                </button>
+            </div>
+        </script>
+
+        <table class="layui-hide" id="borrowInfoTable" lay-filter="currentTableFilter"></table>
+
+        <script type="text/html" id="currentTableBar">
+            <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">编辑</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+        </script>
+
+    </div>
+</div>
+<script th:src="@{/layui/layui.js}" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+    ctxPath = [[@{/}]];
+</script>
+<script type="text/html" id="stateTpl">
+    {{#  if(d.state == 0){
+    return '申请中';
+    }else if(d.state == 1){
+    return '借阅中';
+    }else if(d.state == 2){
+    return '破损';
+    }else if(d.state == 3){
+    return '逾期未还';
+    }else if(d.state == 4){
+    return '已归还';
+    }else if(d.state == 5){
+    return '丢失';
+    }else{
+    return '申请拒绝';
+    }
+    }}
+</script>
+<script type="text/html" id="booleanTpl">
+    {{#  if(d.state == 0){
+    return '否';
+    }else{
+    return '是';
+    }
+    }}
+</script>
+<script th:inline="none">
+    layui.use(['form', 'table'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table,
+            laydate = layui.laydate;
+        laydate.render({
+            elem: '#creSTime',//input的id
+            type: 'datetime', //年月日
+            format: 'yyyy-MM-dd HH:mm:ss'
+        });
+        laydate.render({
+            elem: '#creETime',//input的id
+            type: 'datetime', //年月日
+            format: 'yyyy-MM-dd HH:mm:ss'
+        });
+        table.render({
+            elem: '#borrowInfoTable',
+            url: ctxPath + 'borrowinfo/list',
+            toolbar: '#toolbar',
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'tips',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", width: 50},
+                {field: 'id', width: 80, title: 'ID', sort: true},
+                {field: 'bookInfo', width: 100, title: '书目ID', sort: true},
+                {field: 'title', width: 160, title: '书名'},
+                {field: 'book', width: 100, title: '书本ID', sort: true},
+                {field: 'user', width: 100, title: '借阅人ID'},
+                {field: 'userName', width: 100, title: '借阅人'},
+                {field: 'createTime', width: 160, title: '创建时间', sort: true},
+                {field: 'state', width: 80, title: '状态', templet: '#stateTpl'},
+                {field: 'handler', width: 100, title: '审核人ID'},
+                {field: 'handleTime', width: 160, title: '审核时间'},
+                {field: 'returnTime', width: 160, title: '归还时间'},
+                {field: 'isRenewed', width: 100, title: '是否续借', templet: '#booleanTpl'},
+                {field: 'days', width: 80, title: '借阅天数'},
+                {title: '操作', minWidth: 150, toolbar: '#currentTableBar', align: "center"}
+            ]],
+            limits: [5, 10, 15, 20, 25, 50, 100],
+            limit: 15,
+            page: true,
+            skin: 'line'
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            if ($('#creSTime').val() !== '' && $('#creETime').val() !== '') {
+                //执行搜索重载
+                table.reload('borrowInfoTable', {
+                    where: {
+                        id: data.field.id,
+                        bookInfoId: data.field.bookInfoId,
+                        bookId: data.field.bookId,
+                        title: data.field.title,
+                        userId: data.field.userId,
+                        userName: data.field.userName,
+                        createStartTime: data.field.createStartTime === '' ? null : new Date(data.field.createStartTime),
+                        createEndTime: data.field.createEndTime === '' ? null : new Date(data.field.createEndTime),
+                        state: data.field.state
+                    },
+                    page: {
+                        curr: 1
+                    }
+                });
+            } else {
+                table.reload('borrowInfoTable', {
+                    where: {
+                        id: data.field.id,
+                        bookInfoId: data.field.bookInfoId,
+                        bookId: data.field.bookId,
+                        title: data.field.title,
+                        userId: data.field.userId,
+                        userName: data.field.userName,
+                        state: data.field.state
+                    },
+                    page: {
+                        curr: 1
+                    }
+                });
+            }
+            return false;
+        });
+
+        form.on('submit(data-refresh-btn)', function (data) {
+            $('#form-search')[0].reset();
+            //执行搜索重载
+            refreshTable();
+            return false;
+        });
+
+        /**
+         * toolbar监听事件
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            if (obj.event === 'delete') {  // 监听删除操作
+                layer.confirm('确认删除选中借阅记录？', function () {
+                    var checkStatus = table.checkStatus('bookTable')
+                    var idArray = [];
+                    $(checkStatus.data).each(function () {
+                        idArray.push(this.id);
+                    })
+                    $.ajax({
+                        url: ctxPath + 'delete/' + idArray.join(","),
+                        type: "DELETE",
+                        success: function () {
+                            layer.msg("删除成功！");
+                            refreshTable();
+                        }
+                    })
+                });
+            } else if (obj.event === 'tips') {
+                layer.alert("支持模糊查询。");
+            }
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') {
+                // console.log(data);
+                var index = layer.open({
+                    title: '编辑借阅记录',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['100%', '100%'],
+                    content: ctxPath + 'borrowinfo/edit/' + data.id,
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                return false;
+            } else if (obj.event === 'delete') {
+                layer.confirm('确认删除借阅记录' + obj.data.id + '？', function (index) {
+                    obj.del();
+                    layer.close(index);
+                    $.ajax({
+                        url: ctxPath + "delete/" + obj.data.id,
+                        type: "DELETE",
+                        success: function () {
+                            layer.msg("删除成功！");
+                            refreshTable();
+                        }
+                    })
+                });
+            }
+        });
+
+        function refreshTable() {
+            table.reload('borrowInfoTable', {
+                where: {},
+                page: {
+                    curr: 1
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

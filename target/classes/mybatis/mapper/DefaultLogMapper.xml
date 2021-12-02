@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gdpu.mapper.DefaultLogMapper">
+    <select id="getDefaultLogById" parameterType="java.lang.Integer" resultType="com.gdpu.entity.DefaultLog">
+        SELECT *
+        FROM default_log
+        WHERE id = #{id}
+    </select>
+
+    <!--写入%支持模糊查询，当参数集中不为空时则说明这个参数需要作为筛选条件-->
+    <select id="find" parameterType="com.gdpu.common.vo.DefaultLogQuery" resultType="com.gdpu.entity.DefaultLog">
+        SELECT * FROM default_log
+        <include refid="searchByConditions"/>
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <select id="findNum" parameterType="com.gdpu.common.vo.DefaultLogQuery" resultType="java.lang.Long">
+        SELECT count(1) FROM default_log
+        <include refid="searchByConditions"/>
+    </select>
+
+    <sql id="searchByConditions">
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+            <if test="defaulter != null">
+                AND defaulter = #{defaulter}
+            </if>
+            <if test="book != null">
+                AND book = #{book}
+            </if>
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+            <if test="createStartTime != null and createEndTime != null and createStartTime lte createEndTime">
+                AND create_time BETWEEN #{createStartTime} AND #{createEndTime}
+            </if>
+            <if test="state != null">
+                AND state = #{state}
+            </if>
+        </where>
+    </sql>
+
+    <update id="updateDefaultLog" parameterType="com.gdpu.entity.DefaultLog">
+        UPDATE default_log
+        SET defaulter = #{defaulter},
+            handler = #{handler},
+            book = #{book},
+            type = #{type},
+            reason = #{reason},
+            create_time = #{createTime},
+            fine = #{fine},
+            state = #{state}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteDefaultLogsByIds">
+        DELETE FROM default_log
+        WHERE id IN
+        <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="addDefaultLog" parameterType="com.gdpu.entity.DefaultLog">
+        INSERT INTO default_log (defaulter, handler, book, type, reason, create_time, fine, state)
+        VALUES (#{defaulter},#{handler},#{book},#{type},#{reason},#{createTime},#{fine},#{state})
+    </insert>
+</mapper>

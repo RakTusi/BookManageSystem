@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gdpu.mapper.UserMapper">
+    <select id="getUserByUsername" parameterType="java.lang.String" resultType="com.gdpu.entity.User">
+        SELECT *
+        FROM user
+        WHERE username = #{username}
+    </select>
+
+    <select id="getUserById" parameterType="java.lang.Integer" resultType="com.gdpu.entity.User">
+        SELECT *
+        FROM user
+        WHERE id = #{id}
+    </select>
+
+    <!--写入%支持模糊查询，当参数集中不为空时则说明这个参数需要作为筛选条件-->
+    <select id="find" parameterType="com.gdpu.common.vo.UserQuery" resultType="com.gdpu.entity.User">
+        SELECT * FROM user
+        <include refid="searchByConditions"/>
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <select id="findNum" parameterType="com.gdpu.common.vo.UserQuery" resultType="java.lang.Long">
+        SELECT count(1) FROM user
+        <include refid="searchByConditions"/>
+    </select>
+
+    <sql id="searchByConditions">
+        <where>
+            <if test="status != null">
+                status = #{status}
+            </if>
+            <if test="name != null">
+                AND name LIKE '%' #{name} '%'
+            </if>
+            <if test="username != null">
+                AND username LIKE '%' #{username} '%'
+            </if>
+            <if test="phone != null">
+                AND phone LIKE '%' #{phone}
+            </if>
+            <if test="userid != null">
+                AND id = #{userid}
+            </if>
+        </where>
+    </sql>
+
+    <update id="updateUser" parameterType="com.gdpu.entity.User">
+        UPDATE user
+        SET name      = #{name},
+            gender    = #{gender},
+            phone     = #{phone},
+            balance   = #{balance},
+            status    = #{status},
+            credit    = #{credit},
+            state     = #{state},
+            birthdate = #{birthdate}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteUserByIds">
+        DELETE FROM user
+        WHERE id IN
+        <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="addUser" parameterType="com.gdpu.entity.User">
+        INSERT INTO user (username, password, register_time, status, name, birthdate, gender, phone, balance,
+                          credit, state)
+        VALUES (#{username}, #{password}, #{registerTime}, #{status}, #{name}, #{birthdate}, #{gender}, #{phone},
+                #{balance}, #{credit}, #{state})
+    </insert>
+</mapper>

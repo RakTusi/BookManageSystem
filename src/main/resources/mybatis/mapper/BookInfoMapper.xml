@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gdpu.mapper.BookInfoMapper">
+    <select id="getBookInfoById" parameterType="java.lang.Integer" resultType="com.gdpu.entity.BookInfo">
+        SELECT *
+        FROM book_info
+        WHERE id = #{id}
+    </select>
+
+    <!--写入%支持模糊查询，当参数集中不为空时则说明这个参数需要作为筛选条件-->
+    <select id="find" parameterType="com.gdpu.common.vo.BookInfoQuery" resultType="com.gdpu.entity.BookInfo">
+        SELECT * FROM book_info
+        <include refid="searchByConditions"/>
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <select id="findNum" parameterType="com.gdpu.common.vo.BookInfoQuery" resultType="java.lang.Long">
+        SELECT count(1) FROM book_info
+        <include refid="searchByConditions"/>
+    </select>
+
+    <sql id="searchByConditions">
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+            <if test="title != null">
+                AND title = #{title}
+            </if>
+            <if test="author != null">
+                AND author = #{author}
+            </if>
+            <if test="category != null">
+                AND category = #{category}
+            </if>
+            <if test="press != null">
+                AND press = #{press}
+            </if>
+            <if test="storage != null">
+                AND storage = #{storage}
+            </if>
+        </where>
+    </sql>
+
+    <update id="updateBookInfo" parameterType="com.gdpu.entity.BookInfo">
+        UPDATE book_info
+        SET title = #{title},
+            author = #{author},
+            profile = #{profile},
+            category = #{category},
+            edition = #{edition},
+            press = #{press},
+            publish_date = #{publish_date},
+            storage = #{storage},
+            price = #{price},
+            deposit = #{deposit},
+            picture = #{picture}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteBookInfosByIds">
+        DELETE FROM book_info
+        WHERE id IN
+        <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="addBookInfo" parameterType="com.gdpu.entity.BookInfo">
+        INSERT INTO book_info (title, author, profile, category, edition, press, publish_date, storage, price, deposit, picture)
+        VALUES (#{title}, #{author}, #{profile}, #{category}, #{edition}, #{press}, #{publishDate}, #{storage}, #{price}, #{deposit}, #{picture})
+    </insert>
+</mapper>

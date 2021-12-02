@@ -1,0 +1,83 @@
+{
+  "homeInfo": {
+    "title": "首页",
+    "href": "user/welcome"
+  },
+  "logoInfo": {
+    "title": "图书管理系统",
+    "image": "images/logo.png",
+    "href": ""
+  },
+  "menuInfo": [
+    {
+      "title": "查询图书",
+      "icon": "fa fa-address-book",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "图书列表",
+          "href": "",
+          "icon": "fa fa-book",
+          "target": "_self",
+          "child": [
+            {
+              "title": "书籍列表",
+              "href": "",
+              "icon": "fa fa-book-open",
+              "target": "_self"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "我的借阅",
+      "icon": "fa fa-lemon-o",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "借阅归还",
+          "href": "",
+          "icon": "fa fa-users",
+          "target": "_self",
+          "child": [
+            {
+              "title": "借阅历史",
+              "href": "",
+              "icon": "fa fa-clock",
+              "target": "_self"
+            },
+            {
+              "title": "违规记录",
+              "href": "",
+              "icon": "fa fa-receipt",
+              "target": "_self"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "个人资料",
+      "icon": "fa fa-gear",
+      "href": "",
+      "target": "_self",
+      "child": [
+        {
+          "title": "信息管理",
+          "href": "",
+          "icon": "fa fa-user",
+          "target": ""
+        },
+        {
+          "title": "修改密码",
+          "href": "",
+          "icon": "fa fa-key",
+          "target": "_self"
+        }
+      ]
+    }
+  ]
+}

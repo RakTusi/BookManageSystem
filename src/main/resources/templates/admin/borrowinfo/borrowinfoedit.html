@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>借阅记录详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/css/public.css}" media="all">
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label">记录ID</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content" th:text="${borrowInfo.id}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">书目ID</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content" th:text="${borrowInfo.bookInfo}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">书名</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content" th:text="${borrowInfo.title}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">借阅人ID</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content" th:text="${borrowInfo.user}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">借阅人</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content" th:text="${borrowInfo.userName}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">申请时间</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content"
+                   th:text="${#dates.format(borrowInfo.createTime, 'yyyy-MM-dd HH:mm:ss')}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">处理人</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content" th:text="${borrowInfo.handler}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">处理时间</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content"
+                   th:text="${#dates.format(borrowInfo.handleTime, 'yyyy-MM-dd HH:mm:ss')}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">归还时间</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content"
+                   th:text="${#dates.format(borrowInfo.returnTime, 'yyyy-MM-dd HH:mm:ss')}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否续借</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content"
+                   th:text="${borrowInfo.isRenewed}==1?'是':'否'"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">借阅天数</label>
+        <div class="layui-input-block">
+            <input th:if="${borrowInfo.state!=6}" type="number" name="days" th:value="${borrowInfo.days}" class="layui-input" style="width:260px;">
+            <label class="layui-form-label" style="width: max-content" th:if="${borrowInfo.state==6}" th:text="${borrowInfo.days}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block" style="width: 130px;">
+            <label class="layui-form-label" style="width: max-content"
+                   th:if="${borrowInfo.state==6}">申请拒绝</label>
+            <select th:if="${borrowInfo.state!=6}" name="state" lay-verify="">
+                <option value="0" th:field="*{borrowInfo.state}" th:if="${borrowInfo.state == 0}">申请中</option>
+                <option value="1" th:field="*{borrowInfo.state}" th:if="${borrowInfo.state == 0}">借阅中</option>
+                <option value="2" th:field="*{borrowInfo.state}" th:if="${borrowInfo.state != 0}">破损</option>
+                <option value="3" th:field="*{borrowInfo.state}" th:if="${borrowInfo.state != 0}">过期</option>
+                <option value="4" th:field="*{borrowInfo.state}" th:if="${borrowInfo.state != 0}">已归还</option>
+                <option value="5" th:field="*{borrowInfo.state}" th:if="${borrowInfo.state != 0}">丢失</option>
+                <option value="6" th:field="*{borrowInfo.state}" th:if="${borrowInfo.state == 0}">申请拒绝</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn"><i
+                    class="layui-icon layui-icon-ok"></i> 确认保存
+            </button>
+            <button class="layui-btn layui-btn-primary layui-border-red" id="closeBtn"><i
+                    class="layui-icon layui-icon-close"></i> 取 消
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+<script th:src="@{/layui/layui.js}" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+    ctxPath = [[@{/}]];
+        $ = layui.$;
+</script>
+<script th:inline="javascript">
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            laydate = layui.laydate
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            $.ajax({
+                url: ctxPath + 'borrowinfo/update',
+                type: "POST",
+                data: {
+                    id: [[${borrowInfo.id}]],
+                    state: data.field.state,
+                    days: data.field.days
+                },
+                success: function (response) {
+                    if (response.code === 0) {
+                        layer.msg("修改成功", {time: 1000}, function () {
+                            var iframeIndex = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(iframeIndex);
+                            parent.layui.table.reload('borrowInfoTable', {
+                                page: {
+                                    curr: 1
+                                }
+                            });
+
+                        });
+                    } else {
+                        layer.msg("修改失败", {anim: 6});
+                    }
+                }
+            });
+            return false;
+        });
+    });
+    $('#closeBtn').click(function () {
+        var iframeIndex = parent.layer.getFrameIndex(window.name);
+        parent.layer.close(iframeIndex);
+        return false;
+    });
+</script>
+</body>
+</html>

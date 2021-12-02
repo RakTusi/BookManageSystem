@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gdpu.mapper.BorrowInfoMapper">
+
+    <resultMap id="borrowInfoMap" type="com.gdpu.entity.BorrowInfo">
+        <id property="id" column="id"/>
+        <result property="bookInfo" column="book_info_id"/>
+        <result property="book" column="book_id"/>
+        <result property="user" column="user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="state" column="state"/>
+        <result property="handler" column="handler"/>
+        <result property="handleTime" column="handle_time"/>
+        <result property="returnTime" column="return_time"/>
+        <result property="isRenewed" column="is_renewed"/>
+        <result property="days" column="days"/>
+        <result property="title" column="title"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+
+    <select id="getBorrowInfoById" parameterType="java.lang.Integer" resultMap="borrowInfoMap">
+        SELECT BRI.*, U.name AS user_name, BI.title AS title
+        FROM borrow_info BRI
+                 LEFT JOIN book_info BI on BRI.book_info_id = BI.id
+                 LEFT JOIN user U on BRI.user_id = U.id
+        WHERE BRI.id = #{id}
+    </select>
+
+    <!--写入%支持模糊查询，当参数集中不为空时则说明这个参数需要作为筛选条件-->
+    <select id="find" parameterType="com.gdpu.common.vo.BorrowInfoQuery" resultMap="borrowInfoMap">
+        SELECT BRI.*, U.name AS user_name, BI.title AS title FROM borrow_info BRI
+        LEFT JOIN book_info BI on BRI.book_id = BI.id
+        LEFT JOIN user U on BRI.user_id = U.id
+        <include refid="searchByConditions"/>
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <select id="findNum" parameterType="com.gdpu.common.vo.BorrowInfoQuery" resultType="java.lang.Long">
+        SELECT count(1) FROM borrow_info BRI
+        LEFT JOIN book_info BI on BRI.book_id = BI.id
+        LEFT JOIN user U on BRI.user_id = U.id
+        <include refid="searchByConditions"/>
+    </select>
+
+    <sql id="searchByConditions">
+        <where>
+            <if test="id != null">
+                BRI.id = #{id}
+            </if>
+            <if test="bookInfoId != null">
+                AND BRI.book_info_id = #{bookInfoId}
+            </if>
+            <if test="bookId != null">
+                AND BRI.book_id = #{bookId}
+            </if>
+            <if test="userId != null">
+                AND BRI.user_id = #{userId}
+            </if>
+            <if test="createStartTime != null and createEndTime != null and createStartTime lte createEndTime">
+                AND BRI.create_time BETWEEN #{createStartTime} AND #{createEndTime}
+            </if>
+            <if test="state != null">
+                AND BRI.state = #{state}
+            </if>
+            <if test="userName != null">
+                AND U.name LIKE '%' #{userName} '%'
+            </if>
+            <if test="title != null">
+                AND BI.title LIKE '%' #{title} '%'
+            </if>
+        </where>
+    </sql>
+
+    <update id="updateBorrowInfo" parameterType="com.gdpu.entity.BorrowInfo">
+        UPDATE borrow_info
+        SET state        = #{state}
+        <if test="handleTime != null">
+            ,handle_time  = #{handleTime}
+        </if>
+        <if test="returnTime != null">
+            ,return_time  = #{returnTime}
+        </if>
+        <if test="handler != null">
+            ,handler  = #{handler}
+        </if>
+        <if test="isRenewed != null">
+            ,is_renewed  = #{isRenewed}
+        </if>
+        <if test="days != null">
+            ,days  = #{days}
+        </if>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteBorrowInfosByIds">
+        DELETE FROM borrow_info
+        WHERE id IN
+        <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="addBorrowInfo" parameterType="com.gdpu.entity.BorrowInfo">
+        INSERT INTO borrow_info (book_info_id, book_id, user_id, create_time, state, handler, handle_time, return_time,
+                                 is_renewed, days)
+        VALUES (#{bookInfo}, #{book}, #{user}, #{createTime}, #{state}, #{handler}, #{handleTime}, #{returnTime},
+                #{isRenewed}, #{days})
+    </insert>
+</mapper>

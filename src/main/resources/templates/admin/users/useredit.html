@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>用户编辑</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/css/public.css}" media="all">
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <label class="layui-form-label">用户名</label>
+    <div class="layui-input-block">
+        <label class="layui-form-label" style="width: max-content" th:text="${user.username}"></label>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">姓名</label>
+        <div class="layui-input-block">
+            <input type="text" name="name" lay-verify="required" lay-reqtext="姓名不能为空" placeholder="请输入姓名"
+                   th:value="${user.name}" class="layui-input">
+            <tip>填写用户的真实姓名。</tip>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">性别</label>
+        <div class="layui-input-block">
+            <input type="radio" name="gender" value="0" title="男" th:field="*{user.gender}">
+            <input type="radio" name="gender" value="1" title="女" th:field="*{user.gender}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">手机</label>
+        <div class="layui-input-block">
+            <input type="number" name="phone" lay-verify="required" lay-reqtext="手机号码不能为空" placeholder="请输入手机号码"
+                   th:value="${user.phone}" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">出生日期</label>
+        <div class="layui-input-block">
+            <input type="text" id="birthdateInput" name="birthdate" class="layui-input" style="width:130px;">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">信用分</label>
+        <div class="layui-input-block">
+            <input type="number" name="credit" placeholder="请输入信用分" th:value="${user.credit}" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">余额</label>
+        <div class="layui-input-block">
+            <input type="number" name="balance" placeholder="请输入余额" th:value="${user.balance}" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">管理员</label>
+        <div class="layui-input-block">
+            <input type="checkbox" name="status" lay-skin="switch" value="1" th:field="*{user.status}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">状态</label>
+        <div class="layui-input-block" style="width: 130px;">
+            <select name="state" lay-verify="">
+                <option value="0" th:field="*{user.state}">正常使用</option>
+                <option value="1" th:field="*{user.state}">信用不良</option>
+                <option value="2" th:field="*{user.state}">禁用中</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn"><i
+                    class="layui-icon layui-icon-ok"></i> 确认保存
+            </button>
+            <button class="layui-btn layui-btn-primary layui-border-red" id="closeBtn"><i
+                    class="layui-icon layui-icon-close"></i> 取 消
+            </button>
+        </div>
+    </div>
+</div>
+</div>
+<script th:src="@{/layui/layui.js}" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+    ctxPath = [[@{/}]];
+        $ = layui.$;
+</script>
+<script th:inline="javascript">
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            laydate = layui.laydate
+        laydate.render({
+            elem: '#birthdateInput',//input的id
+            type: 'date', //年月日
+            format: 'yyyy-MM-dd',
+            value: [[${#dates.format(user.birthdate, 'yyyy-MM-dd')}]]
+        });
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            if (data.field.credit < 0 || data.field.credit > 100) {
+                layer.msg("信用分范围在0-100", {anim: 6});
+                return false;
+            }
+            if (data.field.status != 1) {
+                data.field.status = 0;
+            }
+            $.ajax({
+                url: ctxPath + 'user/update',
+                type: "POST",
+                data: {
+                    id: [[${user.id}]],
+                    name: data.field.name,
+                    gender: data.field.gender,
+                    phone: data.field.phone,
+                    birthdate: new Date(data.field.birthdate),
+                    state: data.field.state,
+                    status: data.field.status,
+                    balance: data.field.balance,
+                    credit: data.field.credit
+                },
+                success: function (response) {
+                    if (response.code === 0) {
+                        layer.msg("修改成功", {time: 1000}, function () {
+                            var iframeIndex = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(iframeIndex);
+                            if (parent.layui.$('#userTable').length > 0) {
+                                parent.layui.table.reload('userTable', {
+                                    where: {
+                                        status: 0
+                                    },
+                                    page: {
+                                        curr: 1
+                                    }
+                                });
+                            } else {
+                                parent.layui.table.reload('adminTable', {
+                                    where: {
+                                        status: 1
+                                    },
+                                    page: {
+                                        curr: 1
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        layer.msg("修改失败", {anim: 6});
+                    }
+                }
+            });
+            return false;
+        });
+    });
+    $('#closeBtn').click(function () {
+        var iframeIndex = parent.layer.getFrameIndex(window.name);
+        parent.layer.close(iframeIndex);
+        return false;
+    });
+</script>
+</body>
+</html>

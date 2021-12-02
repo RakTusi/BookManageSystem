@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-cn" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" th:href="@{/images/favicon.ico}">
+    <title>图书管理系统</title>
+</head>
+<body>
+<script th:src="@{/webjars/jquery/3.6.0/jquery.min.js}"></script>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/load/index',
+            type: 'get',
+            headers: {
+                Authorization: localStorage.getItem("token")
+            },
+            success: function (response) {
+                $("body").html(response);
+            }
+        });
+    })
+    // $('#router').load('./test.html');
+</script>
+</body>
+</html>

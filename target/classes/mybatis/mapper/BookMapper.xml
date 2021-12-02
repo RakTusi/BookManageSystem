@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gdpu.mapper.BookMapper">
+
+    <resultMap type="com.gdpu.entity.Book" id="BookResultMap">
+        <id property="id" column="id"/>
+        <result property="bookInfo" column="book_info_id"/>
+        <result property="registerTime" column="register_time"/>
+        <result property="registrant" column="registrant"/>
+        <result property="borrowInfoId" column="borrow_info_id"/>
+        <result property="state" column="state"/>
+        <result property="title" column="title"/>
+        <result property="userName" column="user_name"/>
+        <result property="userId" column="user_id"/>
+    </resultMap>
+
+    <select id="getBookById" parameterType="java.lang.Integer" resultMap="BookResultMap">
+        SELECT *
+        FROM book B
+                 LEFT JOIN book_info BI ON B.book_info_id = BI.id
+        WHERE B.id = #{id}
+    </select>
+
+    <!--写入%支持模糊查询，当参数集中不为空时则说明这个参数需要作为筛选条件-->
+    <select id="find" parameterType="com.gdpu.common.vo.BookQuery" resultMap="BookResultMap">
+        SELECT B.*, BI.title AS title, U.name AS user_name, BRI.user_id AS user_id FROM book B
+        LEFT JOIN book_info BI ON B.book_info_id = BI.id
+        LEFT JOIN borrow_info BRI ON B.borrow_info_id = BRI.id
+        LEFT JOIN user U ON BRI.user_id = U.id
+        <include refid="searchByConditions"/>
+        LIMIT #{start}, #{limit}
+    </select>
+
+    <select id="findNum" parameterType="com.gdpu.common.vo.BookQuery" resultType="java.lang.Long">
+        SELECT count(1) FROM book B
+        LEFT JOIN book_info BI ON B.book_info_id = BI.id
+        <include refid="searchByConditions"/>
+    </select>
+
+    <sql id="searchByConditions">
+        <where>
+            <if test="id != null">
+                B.id = #{id}
+            </if>
+            <if test="bookInfoId != null">
+                AND B.book_info_id = #{bookInfoId}
+            </if>
+            <if test="title != null">
+                AND BI.title LIKE '%' #{title} '%'
+            </if>
+        </where>
+    </sql>
+
+    <update id="updateBook" parameterType="com.gdpu.entity.Book">
+        UPDATE book
+        SET state = #{state}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteBooksByIds">
+        DELETE FROM book
+        WHERE id IN
+        <foreach collection="array" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="addBook" parameterType="com.gdpu.entity.Book">
+        INSERT INTO book (book_info_id, register_time, registrant, state)
+        VALUES (#{bookInfo}, #{registerTime}, #{registrant}, #{state})
+    </insert>
+</mapper>

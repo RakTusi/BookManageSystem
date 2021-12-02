@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>书本列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/css/public.css}" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+
+        <fieldset class="table-search-fieldset">
+            <legend>搜索信息</legend>
+            <div style="margin: 10px 10px 10px 10px">
+                <form id="form-search" class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">书目ID</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="id" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">书名</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="title" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">作者</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="author" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">种类</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="category" autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <button type="submit" class="layui-btn layui-btn-normal" lay-submit
+                                    lay-filter="data-search-btn"><i class="layui-icon layui-icon-search"></i> 搜 索
+                            </button>
+                            <button type="submit" class="layui-btn layui-btn-primary" lay-submit
+                                    lay-filter="data-refresh-btn"><i class="layui-icon layui-icon-refresh"></i> 刷 新
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
+
+        <script type="text/html" id="toolbar">
+            <div class="layui-btn-container">
+                <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"><i
+                        class="layui-icon layui-icon-add-1"></i> 添加
+                </button>
+                <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"><i
+                        class="layui-icon layui-icon-delete"></i> 删除
+                </button>
+            </div>
+        </script>
+
+        <table class="layui-hide" id="bookInfoTable" lay-filter="currentTableFilter"></table>
+
+        <script type="text/html" id="currentTableBar">
+            <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="edit">编辑</a>
+            <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+        </script>
+
+    </div>
+</div>
+<script th:src="@{/layui/layui.js}" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+    ctxPath = [[@{/}]];
+</script>
+<script th:inline="none">
+    layui.use(['form', 'table'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            table = layui.table;
+        table.render({
+            elem: '#bookInfoTable',
+            url: ctxPath + 'bookinfo/list',
+            toolbar: '#toolbar',
+            defaultToolbar: ['filter', 'exports', 'print', {
+                title: '提示',
+                layEvent: 'tips',
+                icon: 'layui-icon-tips'
+            }],
+            cols: [[
+                {type: "checkbox", width: 50},
+                {field: 'id', width: 80, title: 'ID', sort: true},
+                {field: 'title', width: 260, title: '书名'},
+                {field: 'author', width: 180, title: '作者', sort: true},
+                {field: 'profile', width: 100, title: '简介'},
+                {field: 'category', width: 100, title: '种类', sort: true},
+                {field: 'edition', width: 100, title: '版本'},
+                {field: 'press', width: 180, title: '出版社'},
+                {field: 'publishDate', width: 120, title: '出版时间'},
+                {field: 'storage', width: 100, title: '库存量', sort: true},
+                {field: 'price', width: 100, title: '价格', sort: true},
+                {field: 'deposit', width: 100, title: '押金', sort: true},
+                {title: '操作', minWidth: 150, toolbar: '#currentTableBar', align: "center"}
+            ]],
+            limits: [5, 10, 15, 20, 25, 50, 100],
+            limit: 15,
+            page: true,
+            skin: 'line'
+        });
+
+        // 监听搜索操作
+        form.on('submit(data-search-btn)', function (data) {
+            //执行搜索重载
+            table.reload('bookInfoTable', {
+                where: {
+                    id: data.field.bookId,
+                    bookInfoId: data.field.bookInfoId,
+                    title: data.field.title,
+                },
+                page: {
+                    curr: 1
+                }
+            });
+            return false;
+        });
+
+        form.on('submit(data-refresh-btn)', function (data) {
+            $('#form-search')[0].reset();
+            //执行搜索重载
+            refreshTable();
+            return false;
+        });
+
+        /**
+         * toolbar监听事件
+         */
+        table.on('toolbar(currentTableFilter)', function (obj) {
+            if (obj.event === 'add') {  // 监听添加操作
+                var index = layer.open({
+                    title: '添加书目',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['100%', '100%'],
+                    content: ctxPath + 'bookinfo/add',
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+            } else if (obj.event === 'delete') {  // 监听删除操作
+                layer.confirm('确认删除选中书目？', function () {
+                    var checkStatus = table.checkStatus('bookTable')
+                    var idArray = [];
+                    $(checkStatus.data).each(function () {
+                        idArray.push(this.id);
+                    })
+                    $.ajax({
+                        url: ctxPath + 'delete/' + idArray.join(","),
+                        type: "DELETE",
+                        success: function () {
+                            layer.msg("删除成功！");
+                            refreshTable();
+                        }
+                    })
+                });
+            } else if (obj.event === 'tips') {
+                layer.alert("支持模糊查询。");
+            }
+        });
+
+        //监听表格复选框选择
+        table.on('checkbox(currentTableFilter)', function (obj) {
+            console.log(obj)
+        });
+
+        table.on('tool(currentTableFilter)', function (obj) {
+            var data = obj.data;
+            if (obj.event === 'edit') {
+                // console.log(data);
+                var index = layer.open({
+                    title: '编辑书本',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['100%', '100%'],
+                    content: ctxPath + 'bookinfo/edit/' + data.id,
+                });
+                $(window).on("resize", function () {
+                    layer.full(index);
+                });
+                return false;
+            } else if (obj.event === 'delete') {
+                layer.confirm('确认删除书目' + obj.data.title + '？', function (index) {
+                    obj.del();
+                    layer.close(index);
+                    $.ajax({
+                        url: ctxPath + "bookinfo/delete/" + obj.data.id,
+                        type: "DELETE",
+                        success: function () {
+                            layer.msg("删除成功！");
+                            refreshTable();
+                        }
+                    })
+                });
+            }
+        });
+
+        function refreshTable() {
+            table.reload('bookInfoTable', {
+                where: {},
+                page: {
+                    curr: 1
+                }
+            });
+        }
+    });
+</script>
+
+</body>
+</html>

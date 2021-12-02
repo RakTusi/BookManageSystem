@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>用户编辑</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/css/public.css}" media="all">
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <label class="layui-form-label">书目ID</label>
+    <div class="layui-input-block">
+        <label class="layui-form-label" style="width: max-content" th:text="${bookInfo.id}"></label>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">书名</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" lay-verify="required" lay-reqtext="书名不能为空" placeholder="请输入书名"
+                   th:value="${bookInfo.title}" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">作者</label>
+        <div class="layui-input-block">
+            <input type="text" name="author" lay-verify="required" lay-reqtext="作者不能为空" placeholder="请输入作者"
+                   th:value="${bookInfo.author}" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">简介</label>
+        <div class="layui-input-block">
+            <textarea name="profile" class="layui-textarea" placeholder="请输入简介"
+                      th:text="${bookInfo.profile}"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">版本</label>
+        <div class="layui-input-block">
+            <input type="text" name="edition" lay-verify="required" lay-reqtext="版本不能为空" placeholder="请输入版本"
+                   th:value="${bookInfo.edition}" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">出版社</label>
+        <div class="layui-input-block">
+            <input type="text" name="press" lay-verify="required" lay-reqtext="出版社不能为空" placeholder="请输入出版社"
+                   th:value="${bookInfo.press}" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">出版时间</label>
+        <div class="layui-input-block">
+            <input type="text" id="publishDateInput" name="publishTime" class="layui-input" style="width:260px;">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">库存量</label>
+        <div class="layui-input-block">
+            <label class="layui-form-label" style="width: max-content" th:text="${bookInfo.storage}"></label>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">价格</label>
+        <div class="layui-input-block">
+            <input type="number" name="price" placeholder="请输入价格"
+                   th:value="${bookInfo.price}" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label required">押金</label>
+        <div class="layui-input-block">
+            <input type="number" name="deposit" lay-verify="required" lay-reqtext="押金不能为空" placeholder="请输入押金"
+                   th:value="${bookInfo.deposit}" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn"><i
+                    class="layui-icon layui-icon-ok"></i> 确认保存
+            </button>
+            <button class="layui-btn layui-btn-primary layui-border-red" id="closeBtn"><i
+                    class="layui-icon layui-icon-close"></i> 取 消
+            </button>
+        </div>
+    </div>
+</div>
+<script th:src="@{/layui/layui.js}" charset="utf-8"></script>
+<script type="text/javascript" th:inline="javascript">
+    ctxPath = [[@{/}]];
+        $ = layui.$;
+</script>
+<script th:inline="javascript">
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            laydate = layui.laydate
+        laydate.render({
+            elem: '#publishDateInput',//input的id
+            type: 'date', //年月日
+            format: 'yyyy-MM-dd',
+            value: [[${#dates.format(bookInfo.publishDate, 'yyyy-MM-dd')}]]
+        });
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            //此处判断表单正确性
+
+            //发出请求
+            $.ajax({
+                url: ctxPath + 'update',
+                type: "POST",
+                data: {
+                    id: [[${bookinfo.id}]],
+                    title: data.field.title,
+                    author: data.field.author,
+                    profile: data.field.profile,
+                    category: data.field.category,
+                    edition: data.field.edition,
+                    press: data.field.press,
+                    publishDate: data.field.publishDate,
+                    price: data.field.price,
+                    deposit: data.field.deposit,
+                },
+                success: function (response) {
+                    if (response.code === 0) {
+                        layer.msg("修改成功", {time: 1000}, function () {
+                            var iframeIndex = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(iframeIndex);
+                            if (parent.layui.$('#bookInfoTable').length > 0) {
+                                parent.layui.table.reload('bookInfoTable', {
+                                    where: {},
+                                    page: {
+                                        curr: 1
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        layer.msg("修改失败", {anim: 6});
+                    }
+                }
+            });
+            return false;
+        });
+    });
+    $('#closeBtn').click(function () {
+        var iframeIndex = parent.layer.getFrameIndex(window.name);
+        parent.layer.close(iframeIndex);
+        return false;
+    });
+</script>
+</body>
+</html>

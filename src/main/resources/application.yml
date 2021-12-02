@@ -1,0 +1,37 @@
+#端口/数据源/thymeleaf/mybatis/表单转换
+
+#服务器端口
+server:
+  port: 8080
+  #保证错误信息能被保存
+  error:
+    include-message: always
+
+#数据源
+#GMT%2B8是URL编码后GMT+8即东八区（北京时间所在时区）时间
+#Lib中的HikariCP依赖是默认集成在SpringBoot内的连接池产品(号称最快)，如需要更换其他连接池产品，请在引入依赖后添加一条type:表明数据源驱动类的名称
+spring:
+  datasource:
+    username: root
+    password: 6058
+    url: jdbc:mysql://localhost:3306/booksysdb?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+  #thymeleaf中的cache默认为true，如果不将缓存关掉，则修改页面必须重启才能更新，关掉则只需要刷新页面即可
+  thymeleaf:
+    cache: false
+  #实现表达提交方式的转换
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
+  jackson:
+    #json的日期格式
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+#mybatis
+#xml配置文件位置
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/*.xml
+  type-aliases-package: com.gdpu.entity #实体类的别名包
+  configuration:
+    map-underscore-to-camel-case: true #驼峰转换:如studentName和student_name的互相转换
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #打印sql语句
