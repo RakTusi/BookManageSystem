@@ -162,7 +162,7 @@
                         idArray.push(this.id);
                     })
                     $.ajax({
-                        url: ctxPath + 'delete/' + idArray.join(","),
+                        url: ctxPath + 'bookinfo/delete/' + idArray.join(","),
                         type: "DELETE",
                         success: function () {
                             layer.msg("删除成功！");
